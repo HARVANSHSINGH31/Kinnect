@@ -7,9 +7,10 @@ from voice.cue_generator import generate_cue
 from voice.player import speak
 
 # Person database — hardcoded for Phase 1 demo
-# Replace with SQLite lookup in Phase 2
+# Add photos to data/photos/<Name>/ to activate each person
 KNOWN_PEOPLE = {
-    "Harvansh": {"relationship": "son", "context": ""},
+    "Harvansh": {"relationship": "son",    "context": ""},
+    "Japjeet":  {"relationship": "brother", "context": ""},
 }
 
 def on_face_detected(name: str, confidence: float):
