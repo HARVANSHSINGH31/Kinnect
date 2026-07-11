@@ -18,3 +18,7 @@ def init_db():
 
 if __name__ == "__main__":
     init_db()
+
+def get_db():
+    conn = get_connection()
+    return conn
