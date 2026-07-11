@@ -17,7 +17,7 @@ def should_trigger(person_name):
 def mark_triggered(person_name):
     last_triggered[person_name] = time.time()
 
-def run_detector(on_face_detected):
+def run_detector(on_face_detected, headless=False):
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("ERROR: Cannot open camera.")
@@ -47,7 +47,7 @@ def run_detector(on_face_detected):
                 identity = top.get("identity", "")
                 distance = top.get("distance", 1.0)
                 threshold = top.get("threshold", 0.4)
-                if distance < threshold and identity:
+                if distance < threshold:
                     parts = identity.replace("\\", "/").split("/")
                     name = parts[-2] if len(parts) >= 2 else "Unknown"
                     confidence = round((1 - distance / threshold) * 100, 1)
@@ -64,19 +64,25 @@ def run_detector(on_face_detected):
                             args=(name, confidence),
                             daemon=True
                         ).start()
-                    cv2.putText(
-                        frame, f"{name} {confidence}%",
-                        (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 255, 0), 2
-                    )
+                    if not headless:
+                        cv2.putText(
+                            frame, f"{name} {confidence}%",
+                            (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
+                            1, (0, 255, 0), 2
+                        )
         except Exception as e:
             pass
-        cv2.imshow("Kinnect - Press Q to quit", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+
+        if not headless:
+            cv2.imshow("Kinnect - Press Q to quit", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        else:
+            time.sleep(0.05)
 
     cap.release()
-    cv2.destroyAllWindows()
+    if not headless:
+        cv2.destroyAllWindows()
     print("Camera stopped.")
 
 if __name__ == "__main__":
