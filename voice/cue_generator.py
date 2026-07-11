@@ -11,6 +11,7 @@ def generate_cue(person_name: str, relationship: str, extra_context: str = "") -
         "husband":       f"It's your husband {person_name}. I'm right here.",
         "wife":          f"It's your wife {person_name}. Everything is okay.",
         "friend":        f"Hi, it's your friend {person_name}. Great to see you.",
+        "brother":       f"Hey, it's your brother {person_name}. I'm here with you.",
         "caregiver":     f"Hi, it's {person_name}, your caregiver. You're in good hands.",
         "doctor":        f"Hello, it's Dr. {person_name}. You're doing wonderfully.",
     }
