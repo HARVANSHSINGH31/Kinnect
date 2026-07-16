@@ -5,6 +5,7 @@ from deepface import DeepFace
 
 last_triggered = {}
 COOLDOWN_SECONDS = 300
+CONFIDENCE_THRESHOLD = 70.0  # Below this, stay silent — wrong cue is worse than no cue
 
 def should_trigger(person_name):
     now = time.time()
@@ -52,23 +53,31 @@ def run_detector(on_face_detected, headless=False):
                     name = parts[-2] if len(parts) >= 2 else "Unknown"
                     confidence = round((1 - distance / threshold) * 100, 1)
                     now = time.time()
+
                     if name not in face_detected_time:
                         face_detected_time[name] = now
                     visible_for = now - face_detected_time[name]
+
                     if visible_for >= CONFIRM_SECONDS and should_trigger(name):
-                        mark_triggered(name)
-                        face_detected_time.pop(name, None)
-                        print(f"RECOGNISED: {name} ({confidence}% confidence)")
-                        threading.Thread(
-                            target=on_face_detected,
-                            args=(name, confidence),
-                            daemon=True
-                        ).start()
+                        if confidence >= CONFIDENCE_THRESHOLD:
+                            mark_triggered(name)
+                            face_detected_time.pop(name, None)
+                            print(f"RECOGNISED: {name} ({confidence}% confidence)")
+                            threading.Thread(
+                                target=on_face_detected,
+                                args=(name, confidence),
+                                daemon=True
+                            ).start()
+                        else:
+                            face_detected_time.pop(name, None)
+                            print(f"[KINNECT] Low confidence ({confidence}%) for {name} — staying silent")
+
                     if not headless:
+                        color = (0, 255, 0) if confidence >= CONFIDENCE_THRESHOLD else (0, 165, 255)
                         cv2.putText(
                             frame, f"{name} {confidence}%",
                             (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
-                            1, (0, 255, 0), 2
+                            1, color, 2
                         )
         except Exception as e:
             pass
